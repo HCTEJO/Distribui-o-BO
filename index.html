@@ -33,100 +33,83 @@
   <nav id="bottom-nav" style="display:none"></nav>
 
   <script>
+    // URL do WebApp Apps Script
     var WEBAPP = "https://script.google.com/macros/s/AKfycbxvN_I4tVKeMRioMnqDXmJ8WbLPyQiyR_lbgl2wxkraJQS25M-ALlX0DJVmBiz6yJDx/exec";
 
     var tabActiva = null;
 
-    function getTabParam() {
-      return new URLSearchParams(window.location.search).get("tab") || "";
-    }
+    function carregarConteudo(nomeDia) {
+      tabActiva = nomeDia || null;
 
-    function carregarConteudo(tab) {
-      tabActiva = tab || getTabParam() || null;
-      var url = WEBAPP + (tabActiva ? "?tab=" + encodeURIComponent(tabActiva) : "");
-
+      // Reset UI
       document.getElementById("main").innerHTML =
         "<div class='loading'><div class='spinner'></div><span>A carregar...</span></div>";
       document.getElementById("header").style.display = "none";
       document.getElementById("bottom-nav").style.display = "none";
 
+      // Construir URL com endpoint JSON + tab opcional
+      var url = WEBAPP + "?format=json";
+      if (tabActiva) url += "&tab=" + encodeURIComponent(tabActiva);
+
       fetch(url)
         .then(function(r) {
           if (!r.ok) throw new Error("HTTP " + r.status);
-          return r.text();
+          return r.json();
         })
-        .then(function(html) {
-          var parser = new DOMParser();
-          var doc    = parser.parseFromString(html, "text/html");
+        .then(function(data) {
+          if (data.erro) {
+            mostrarErro("Dados não disponíveis", data.erro);
+            return;
+          }
 
-          // Título e subtítulo
-          var h1  = doc.querySelector("header h1");
-          var sub = doc.querySelector("header .sub");
-          if (h1)  document.getElementById("titulo").textContent    = h1.textContent;
-          if (sub) document.getElementById("subtitulo").textContent = sub.textContent;
-          document.getElementById("header").style.display = "flex";
+          // Actualizar cabeçalho
+          document.getElementById("titulo").textContent    = "Distribuição " + data.titulo;
+          document.getElementById("subtitulo").textContent = "Actualizado: " + data.timestamp;
+          document.getElementById("header").style.display  = "flex";
 
-          // Tabela
-          var scroll = doc.querySelector(".scroll");
-          document.getElementById("main").innerHTML = scroll
-            ? "<div class='scroll'>" + scroll.innerHTML + "</div>"
-            : "<div class='scroll'>" + doc.body.innerHTML + "</div>";
+          // Injectar tabela
+          document.getElementById("main").innerHTML =
+            "<div class='scroll'>" + data.tabela + "</div>";
 
-          // Bottom nav — extrair lista de tabs do WebApp
-          construirBottomNav(doc);
+          // Construir bottom nav
+          construirNav(data.tabs, data.titulo);
         })
         .catch(function(err) {
-          document.getElementById("main").innerHTML =
-            "<div class='card-erro'><h2>Distribuição BO</h2>" +
-            "<p>Não foi possível carregar.<br><small>" + err.message + "</small></p></div>";
+          mostrarErro("Não foi possível carregar.", err.message);
         });
     }
 
-    function construirBottomNav(doc) {
-      // O WebApp inclui os tabs disponíveis no elemento .tabs
-      var tabsEl  = doc.querySelector(".tabs");
-      var nav     = document.getElementById("bottom-nav");
-
-      // Extrair tabs: tab activa + links de outras tabs
-      var tabs = [];
-
-      // Tab activa (vem no h1 do header)
-      var h1 = doc.querySelector("header h1");
-      if (h1) {
-        var nomeActiva = h1.textContent.replace("Distribuicao ", "").trim();
-        tabs.push({ nome: nomeActiva, activa: true });
-      }
-
-      // Outros tabs (links na barra .tabs)
-      if (tabsEl) {
-        tabsEl.querySelectorAll("a").forEach(function(a) {
-          var nome = a.textContent.trim();
-          if (nome) tabs.push({ nome: nome, activa: false });
-        });
-      }
-
-      if (tabs.length <= 1) {
-        nav.style.display = "none";
-        return;
-      }
+    function construirNav(tabs, nomeActivo) {
+      var nav = document.getElementById("bottom-nav");
+      if (!tabs || tabs.length <= 1) { nav.style.display = "none"; return; }
 
       nav.innerHTML = tabs.map(function(t) {
-        var cls = t.activa ? "nav-tab active" : "nav-tab";
-        var onclick = t.activa ? "" : "onclick=\"carregarConteudo('" + t.nome + "')\"";
-        return "<button class='" + cls + "' " + onclick + ">" +
-               "<span class='nav-dia'>" + t.nome.split(" ").slice(0,2).join(" ") + "</span>" +
-               "<span class='nav-mes'>" + t.nome.split(" ")[2] + "</span>" +
+        var partes  = t.nome.split(" ");
+        var dia     = partes.slice(0, 2).join(" ");
+        var mes     = partes[2] || "";
+        var activo  = t.nome === nomeActivo;
+        var onclick = activo ? "" : "onclick=\"carregarConteudo('" + t.nome + "')\"";
+        return "<button class='nav-tab" + (activo ? " active" : "") + "' " + onclick + ">" +
+               "<span class='nav-dia'>" + dia + "</span>" +
+               "<span class='nav-mes'>" + mes + "</span>" +
                "</button>";
       }).join("");
 
       nav.style.display = "flex";
-      // Ajustar padding do main para nao ficar tapado pela nav
       document.getElementById("main").style.paddingBottom = "64px";
     }
 
-    function recarregar() {
-      carregarConteudo(tabActiva);
+    function mostrarErro(msg, detalhe) {
+      document.getElementById("header").style.display = "none";
+      document.getElementById("bottom-nav").style.display = "none";
+      document.getElementById("main").innerHTML =
+        "<div class='card-erro'>" +
+        "<h2>Distribuição BO</h2>" +
+        "<p>" + msg + "<br><small>" + (detalhe || "") + "</small></p>" +
+        "</div>";
     }
+
+    function recarregar() { carregarConteudo(tabActiva); }
 
     // Iniciar
     carregarConteudo(null);
