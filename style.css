@@ -1,0 +1,163 @@
+/* ================================================
+   Distribuição BO — PWA Shell
+   ================================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --azul:       #1a3a6b;
+  --azul-dark:  #142d56;
+  --azul-mid:   #1e4d8c;
+  --bg:         #f0f2f5;
+  --branco:     #ffffff;
+  --sombra:     rgba(0,0,0,.15);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  background: var(--bg);
+  color: #202124;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ───────────────────────────── */
+header {
+  background: var(--azul);
+  color: var(--branco);
+  padding: 10px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px var(--sombra);
+}
+
+header h1  { font-size: 15px; font-weight: 700; }
+header .sub { font-size: 10px; opacity: .7; margin-top: 2px; }
+
+/* ── Botão actualizar ─────────────────── */
+.btn {
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3);
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background .15s;
+  line-height: 1;
+}
+.btn:hover  { background: rgba(255,255,255,.25); }
+.btn:active { background: rgba(255,255,255,.38); }
+
+/* ── Conteúdo ─────────────────────────── */
+#main {
+  flex: 1;
+  overflow: hidden;
+}
+
+.scroll {
+  overflow: auto;
+  padding: 10px;
+  -webkit-overflow-scrolling: touch;
+  height: calc(100vh - 110px); /* header + bottom nav */
+}
+
+/* Tabela (inline styles do Sheets sobrepõem) */
+table {
+  border-collapse: collapse;
+  background: var(--branco);
+  box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  white-space: nowrap;
+}
+
+td { border: 1px solid #d0d0d0; overflow: hidden; white-space: nowrap; }
+
+/* ── Loading ──────────────────────────── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 14px;
+  color: #777;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #ddd;
+  border-top-color: var(--azul);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Erro ─────────────────────────────── */
+.card-erro {
+  background: var(--branco);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  max-width: 280px;
+  margin: 80px auto;
+}
+.card-erro h2 { color: var(--azul); margin-bottom: 10px; font-size: 17px; }
+.card-erro p  { color: #666; font-size: 12px; line-height: 1.6; }
+.card-erro small { color: #999; font-size: 10px; }
+
+/* ── Bottom navigation ────────────────── */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--azul-dark);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+  box-shadow: 0 -2px 8px var(--sombra);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#bottom-nav::-webkit-scrollbar { display: none; }
+
+.nav-tab {
+  flex: 1;
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,.08);
+  color: rgba(255,255,255,.55);
+  cursor: pointer;
+  padding: 8px 6px;
+  transition: background .15s, color .15s;
+}
+
+.nav-tab:last-child { border-right: none; }
+.nav-tab:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); }
+
+.nav-tab.active {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border-top: 2px solid rgba(255,255,255,.7);
+}
+
+.nav-dia { font-size: 12px; font-weight: 700; letter-spacing: .2px; }
+.nav-mes { font-size: 9px;  opacity: .8; }

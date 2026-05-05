@@ -1,0 +1,20 @@
+{
+  "name": "Distribuição Enfermagem BO",
+  "short_name": "Distrib. BO",
+  "description": "Distribuição diária do Bloco Operatório - CUF Tejo",
+  "start_url": "/Distribui-o-BO/",
+  "scope": "/Distribui-o-BO/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#f0f2f5",
+  "theme_color": "#1a3a6b",
+  "lang": "pt-PT",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
