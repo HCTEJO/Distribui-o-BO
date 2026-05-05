@@ -10,109 +10,94 @@
   <meta name="theme-color" content="#1a3a6b">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="style.css">
   <title>Distribuição BO</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #1a3a6b;
+    }
+
+    /* Splash enquanto o iframe carrega */
+    #splash {
+      position: fixed;
+      inset: 0;
+      background: #1a3a6b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 10;
+      transition: opacity .4s ease;
+    }
+
+    #splash.oculto {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #splash h1 {
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    #splash .sub {
+      color: rgba(255,255,255,.6);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Iframe a 100% */
+    #frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
-  <header id="header" style="display:none">
-    <div>
-      <h1 id="titulo">Distribuição BO</h1>
-      <div class="sub" id="subtitulo"></div>
-    </div>
-    <button class="btn" onclick="recarregar()">↻</button>
-  </header>
-
-  <div id="main">
-    <div class="loading">
-      <div class="spinner"></div>
-      <span>A carregar...</span>
-    </div>
+  <!-- Splash de carregamento -->
+  <div id="splash">
+    <div class="spinner"></div>
+    <h1>Distribuição BO</h1>
+    <div class="sub">Hospital CUF Tejo · Bloco Operatório</div>
   </div>
 
-  <nav id="bottom-nav" style="display:none"></nav>
+  <!-- Conteúdo do WebApp em iframe -->
+  <iframe
+    id="frame"
+    src="https://script.google.com/macros/s/AKfycbxvN_I4tVKeMRioMnqDXmJ8WbLPyQiyR_lbgl2wxkraJQS25M-ALlX0DJVmBiz6yJDx/exec"
+    onload="ocultarSplash()"
+    allow="fullscreen">
+  </iframe>
 
   <script>
-    // URL do WebApp Apps Script
-    var WEBAPP = "https://script.google.com/macros/s/AKfycbxvN_I4tVKeMRioMnqDXmJ8WbLPyQiyR_lbgl2wxkraJQS25M-ALlX0DJVmBiz6yJDx/exec";
-
-    var tabActiva = null;
-
-    function carregarConteudo(nomeDia) {
-      tabActiva = nomeDia || null;
-
-      // Reset UI
-      document.getElementById("main").innerHTML =
-        "<div class='loading'><div class='spinner'></div><span>A carregar...</span></div>";
-      document.getElementById("header").style.display = "none";
-      document.getElementById("bottom-nav").style.display = "none";
-
-      // Construir URL com endpoint JSON + tab opcional
-      var url = WEBAPP + "?format=json";
-      if (tabActiva) url += "&tab=" + encodeURIComponent(tabActiva);
-
-      fetch(url)
-        .then(function(r) {
-          if (!r.ok) throw new Error("HTTP " + r.status);
-          return r.json();
-        })
-        .then(function(data) {
-          if (data.erro) {
-            mostrarErro("Dados não disponíveis", data.erro);
-            return;
-          }
-
-          // Actualizar cabeçalho
-          document.getElementById("titulo").textContent    = "Distribuição " + data.titulo;
-          document.getElementById("subtitulo").textContent = "Actualizado: " + data.timestamp;
-          document.getElementById("header").style.display  = "flex";
-
-          // Injectar tabela
-          document.getElementById("main").innerHTML =
-            "<div class='scroll'>" + data.tabela + "</div>";
-
-          // Construir bottom nav
-          construirNav(data.tabs, data.titulo);
-        })
-        .catch(function(err) {
-          mostrarErro("Não foi possível carregar.", err.message);
-        });
+    function ocultarSplash() {
+      document.getElementById("splash").classList.add("oculto");
     }
 
-    function construirNav(tabs, nomeActivo) {
-      var nav = document.getElementById("bottom-nav");
-      if (!tabs || tabs.length <= 1) { nav.style.display = "none"; return; }
-
-      nav.innerHTML = tabs.map(function(t) {
-        var partes  = t.nome.split(" ");
-        var dia     = partes.slice(0, 2).join(" ");
-        var mes     = partes[2] || "";
-        var activo  = t.nome === nomeActivo;
-        var onclick = activo ? "" : "onclick=\"carregarConteudo('" + t.nome + "')\"";
-        return "<button class='nav-tab" + (activo ? " active" : "") + "' " + onclick + ">" +
-               "<span class='nav-dia'>" + dia + "</span>" +
-               "<span class='nav-mes'>" + mes + "</span>" +
-               "</button>";
-      }).join("");
-
-      nav.style.display = "flex";
-      document.getElementById("main").style.paddingBottom = "64px";
-    }
-
-    function mostrarErro(msg, detalhe) {
-      document.getElementById("header").style.display = "none";
-      document.getElementById("bottom-nav").style.display = "none";
-      document.getElementById("main").innerHTML =
-        "<div class='card-erro'>" +
-        "<h2>Distribuição BO</h2>" +
-        "<p>" + msg + "<br><small>" + (detalhe || "") + "</small></p>" +
-        "</div>";
-    }
-
-    function recarregar() { carregarConteudo(tabActiva); }
-
-    // Iniciar
-    carregarConteudo(null);
+    // Fallback: ocultar splash ao fim de 10s mesmo sem onload
+    setTimeout(ocultarSplash, 10000);
   </script>
 
 </body>
