@@ -19,9 +19,10 @@
       width: 100%;
       overflow: hidden;
       background: #1a3a6b;
+      font-family: Arial, sans-serif;
     }
 
-    /* Splash enquanto o iframe carrega */
+    /* Splash de carregamento */
     #splash {
       position: fixed;
       inset: 0;
@@ -32,7 +33,7 @@
       justify-content: center;
       gap: 20px;
       z-index: 10;
-      transition: opacity .4s ease;
+      transition: opacity .5s ease;
     }
 
     #splash.oculto {
@@ -42,21 +43,19 @@
 
     #splash h1 {
       color: white;
-      font-family: Arial, sans-serif;
       font-size: 20px;
       font-weight: 700;
       letter-spacing: .5px;
     }
 
     #splash .sub {
-      color: rgba(255,255,255,.6);
-      font-family: Arial, sans-serif;
+      color: rgba(255,255,255,.55);
       font-size: 12px;
     }
 
     .spinner {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border: 3px solid rgba(255,255,255,.2);
       border-top-color: white;
       border-radius: 50%;
@@ -65,29 +64,29 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Iframe a 100% */
+    /* iframe a 100% */
     #frame {
       width: 100%;
       height: 100%;
       border: none;
       display: block;
+      background: white;
     }
   </style>
 </head>
 <body>
 
-  <!-- Splash de carregamento -->
   <div id="splash">
     <div class="spinner"></div>
     <h1>Distribuição BO</h1>
     <div class="sub">Hospital CUF Tejo · Bloco Operatório</div>
   </div>
 
-  <!-- Conteúdo do WebApp em iframe -->
   <iframe
     id="frame"
-    src="https://script.google.com/macros/s/AKfycbxvN_I4tVKeMRioMnqDXmJ8WbLPyQiyR_lbgl2wxkraJQS25M-ALlX0DJVmBiz6yJDx/exec"
+    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSor5hywrlcMWl-iHXAjRWEvWzZ67R35BVAes5rK58DeDR4r5CgJzgtHxhNdsA_Vl9XX6_01eOaYcuz/pubhtml"
     onload="ocultarSplash()"
+    sandbox="allow-scripts allow-same-origin allow-popups"
     allow="fullscreen">
   </iframe>
 
@@ -95,9 +94,7 @@
     function ocultarSplash() {
       document.getElementById("splash").classList.add("oculto");
     }
-
-    // Fallback: ocultar splash ao fim de 10s mesmo sem onload
-    setTimeout(ocultarSplash, 10000);
+    setTimeout(ocultarSplash, 8000);
   </script>
 
 </body>
