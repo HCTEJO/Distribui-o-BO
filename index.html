@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -65,12 +65,13 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* Ajustar --escala: 0.80 = 20% menor, 0.75 = 25% menor */
-    :root { --escala: 0.60; }
+    :root { --escala: 0.80; }
 
     #frame-wrap {
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
       position: relative;
     }
 
